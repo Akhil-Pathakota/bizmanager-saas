@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+backend/venv/
+backend/__pycache__/
+
+# Build 
+frontend/dist/
+
+# Native (Rebuilt automatically by CI)
+frontend/android/
+frontend/ios/
+
+# Environment
+.env
+*.db
+
+node_modules/
+dist/
+dist_electron/
+*.exe

@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Install Frontend Dependencies
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Build Web Application
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Sync Capacitor to Android Target
+      working-directory: ./frontend
+      run: npx cap sync android
+
+    - name: Execute Native Gradle Build
+      working-directory: ./frontend/android
+      run: ./gradlew assembleDebug
+
+    - name: Publish APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BusinessManager-App
+        path: frontend/android/app/build/outputs/apk/debug/app-debug.apk

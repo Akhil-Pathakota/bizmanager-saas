@@ -1,0 +1,6 @@
+{
+  "appId": "com.biz.manager",
+  "appName": "Business Manager",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,39 @@
+name: Build Windows EXE
+on: 
+  workflow_dispatch: # Allows you to run it manually
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Python (for Backend)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Frontend Deps
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Package Python Backend
+        run: |
+          pip install pyinstaller fastapi uvicorn
+          pyinstaller --onefile backend/app.py --name business-backend
+        # Note: Adjust 'backend/main.py' to your actual backend file path
+
+      - name: Upload EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BusinessManager-Windows
+          path: dist/business-backend.exe
