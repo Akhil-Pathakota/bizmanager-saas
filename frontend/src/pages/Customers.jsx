@@ -52,26 +52,16 @@ export default function Customers() {
   };
 
   const sendWhatsAppReminder = (customer) => {
-    // Clean the phone number — remove spaces, dashes, brackets, the + symbol
     let phone = (customer.phone || '').replace(/[\s\-\(\)\+]/g, '');
-    
     if (!phone || phone.length < 10) {
-      alert(`Cannot send WhatsApp reminder: ${customer.name} does not have a valid phone number. Please add their phone number with country code (e.g., 919876543210).`);
+      alert(`Cannot send WhatsApp reminder: ${customer.name} does not have a valid phone number.`);
       return;
     }
-    
-    // If phone doesn't start with country code (less than 11 digits), prepend 91 for India
-    if (phone.length === 10) {
-      phone = '91' + phone;
-    }
+    if (phone.length === 10) phone = '91' + phone;
     
     const amount = Number(customer.totalOutstandingBalance).toFixed(2);
     const message = `Hello ${customer.name},\n\nThis is a friendly reminder from BizManager.\n\nYou have a pending balance of ₹${amount}.\n\nPlease make payment at your earliest convenience.\n\nThank you!`;
-    
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
@@ -157,7 +147,7 @@ export default function Customers() {
                                     <td style={{padding: '12px 16px'}}>
                                       <ul style={{margin: 0, paddingLeft: '16px'}}>
                                         {order.items.map((item, i) => (
-                                          <li key={i} className="text-sm" style={{fontSize: '13px'}}>{item.quantity}x {item.productName}</li>
+                                          <li key={i} style={{fontSize: '13px'}}>{item.quantity}x {item.productName}</li>
                                         ))}
                                       </ul>
                                     </td>
@@ -234,7 +224,6 @@ export default function Customers() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

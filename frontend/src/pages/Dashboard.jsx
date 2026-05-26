@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { DollarSign, PackageOpen, TrendingUp, Users, AlertTriangle } from 'lucide-react';
+import { DollarSign, PackageOpen, TrendingUp, Users, AlertTriangle, UserPlus, Copy, Check, Shield, UserCheck } from 'lucide-react';
 import api from '../api';
+import { useAuth } from '../AuthContext';
 
 export default function Dashboard() {
+  const { isOwner } = useAuth();
   const [data, setData] = useState(null);
-  
+  const [team, setTeam] = useState([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+
   useEffect(() => {
     api.get('/dashboard').then(res => setData(res.data)).catch(console.error);
+    api.get('/users').then(res => setTeam(res.data)).catch(console.error);
   }, []);
 
   const handleFactoryReset = () => {
@@ -16,11 +25,30 @@ export default function Dashboard() {
         api.post('/factory-reset').then(() => {
           alert('Database reset successful. App is now completely fresh.');
           window.location.reload();
-        }).catch(err => alert("Failed to reset: " + err.response?.data?.error));
+        }).catch(err => alert("Failed to reset: " + (err.response?.data?.error || err.message)));
       } else {
         alert("Reset cancelled. You did not type RESET.");
       }
     }
+  };
+
+  const handleInvite = async (e) => {
+    e.preventDefault();
+    setInviteLoading(true);
+    try {
+      const res = await api.post('/auth/invite', { email: inviteEmail || null });
+      setInviteCode(res.data.code);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to create invite');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(inviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (!data) return <div className="page-header"><h1 className="page-title">Loading...</h1></div>;
@@ -29,9 +57,14 @@ export default function Dashboard() {
     <div>
       <div className="page-header">
         <h1 className="page-title">Dashboard Overview</h1>
-        <button className="btn btn-danger" onClick={handleFactoryReset}>
-          <AlertTriangle size={16}/> Factory Reset App
-        </button>
+        <div className="flex gap-2">
+          <button className="btn btn-primary" onClick={() => { setShowInviteModal(true); setInviteCode(''); setInviteEmail(''); }}>
+            <UserPlus size={16}/> Invite Employee
+          </button>
+          <button className="btn btn-danger" onClick={handleFactoryReset}>
+            <AlertTriangle size={16}/> Factory Reset
+          </button>
+        </div>
       </div>
       
       <div className="dashboard-stats-grid">
@@ -91,7 +124,80 @@ export default function Dashboard() {
           <h3 style={{color: 'var(--brand-warning)', display: 'flex', alignItems: 'center', gap: '8px'}}>
             <PackageOpen size={20} /> Watch out!
           </h3>
-          <p className="mt-4">You have <strong>{data.lowStockCount}</strong> items that are running low in stock (5 or less remaining). Check the inventory to reorder before you run out.</p>
+          <p className="mt-4">You have <strong>{data.lowStockCount}</strong> items running low in stock (5 or less remaining).</p>
+        </div>
+      )}
+
+      {/* Team Section */}
+      <div className="card mt-4">
+        <h3 className="flex items-center gap-2 mb-4"><Users size={18}/> Your Team</h3>
+        <div className="table-container" style={{boxShadow: 'none', border: '1px solid var(--border-light)'}}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {team.map(u => (
+                <tr key={u.id}>
+                  <td style={{fontWeight: 600}}>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className={`sidebar-role-badge ${u.role === 'owner' ? 'role-owner' : 'role-employee'}`}>
+                      {u.role === 'owner' ? <><Shield size={11}/> Owner</> : <><UserCheck size={11}/> Employee</>}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2 className="mb-4">Invite Employee</h2>
+            {!inviteCode ? (
+              <form onSubmit={handleInvite}>
+                <div className="form-group">
+                  <label className="form-label">Employee Email (Optional)</label>
+                  <input className="form-input" type="email" value={inviteEmail}
+                    onChange={e => setInviteEmail(e.target.value)}
+                    placeholder="employee@example.com" />
+                  <small className="text-secondary" style={{display: 'block', marginTop: '4px'}}>
+                    Leave blank to create a code anyone can use.
+                  </small>
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button type="button" className="btn btn-outline" onClick={() => setShowInviteModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={inviteLoading}>
+                    {inviteLoading ? 'Generating...' : 'Generate Invite Code'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div>
+                <p className="text-secondary mb-4">Share this code with your employee. They'll use it to register.</p>
+                <div className="invite-code-display">
+                  <span className="invite-code-text">{inviteCode}</span>
+                  <button className="btn btn-outline" onClick={copyCode} style={{padding: '8px 12px'}}>
+                    {copied ? <><Check size={16}/> Copied!</> : <><Copy size={16}/> Copy</>}
+                  </button>
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button className="btn btn-outline" onClick={() => setShowInviteModal(false)}>Done</button>
+                  <button className="btn btn-primary" onClick={() => { setInviteCode(''); setInviteEmail(''); }}>
+                    Generate Another
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

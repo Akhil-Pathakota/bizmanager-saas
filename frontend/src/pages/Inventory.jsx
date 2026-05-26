@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import api from '../api';
+import { useAuth } from '../AuthContext';
 
 const UNIT_OPTIONS = [
   { value: 'pcs', label: 'Pieces (pcs)' },
@@ -52,6 +53,7 @@ const UNIT_OPTIONS = [
 const DECIMAL_UNITS = ['kg', 'g', 'mg', 'lb', 'oz', 'ton', 'quintal', 'ft', 'in', 'm', 'cm', 'mm', 'yd', 'km', 'L', 'mL', 'gal', 'qt', 'sqft', 'sqm'];
 
 export default function Inventory() {
+  const { isOwner } = useAuth();
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', category: '', purchaseCost: 0, defaultSellingPrice: 0, currentStock: 0, unit: 'pcs' });
@@ -65,13 +67,16 @@ export default function Inventory() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const submitData = { ...formData };
+    if (!isOwner) delete submitData.purchaseCost;
+    
     if (editingId) {
-      api.put(`/products/${editingId}`, formData).then(() => {
+      api.put(`/products/${editingId}`, submitData).then(() => {
         loadProducts();
         closeModal();
       }).catch(console.error);
     } else {
-      api.post('/products', formData).then(() => {
+      api.post('/products', submitData).then(() => {
         loadProducts();
         closeModal();
       }).catch(console.error);
@@ -88,7 +93,7 @@ export default function Inventory() {
 
   const openModal = (product = null) => {
     if (product) {
-      setFormData({ ...product, unit: product.unit || 'pcs' });
+      setFormData({ ...product, unit: product.unit || 'pcs', purchaseCost: product.purchaseCost || 0 });
       setEditingId(product.id);
     } else {
       setFormData({ name: '', category: '', purchaseCost: 0, defaultSellingPrice: 0, currentStock: 0, unit: 'pcs' });
@@ -114,7 +119,7 @@ export default function Inventory() {
             <tr>
               <th>Name</th>
               <th>Category</th>
-              <th>Investment/Cost</th>
+              {isOwner && <th>Investment/Cost</th>}
               <th>Base Price</th>
               <th>Stock</th>
               <th className="text-right">Actions</th>
@@ -122,13 +127,13 @@ export default function Inventory() {
           </thead>
           <tbody>
             {products.length === 0 && (
-              <tr><td colSpan="6" className="text-center text-secondary">No products found. Add one to get started.</td></tr>
+              <tr><td colSpan={isOwner ? 6 : 5} className="text-center text-secondary">No products found. Add one to get started.</td></tr>
             )}
             {products.map(p => (
               <tr key={p.id}>
                 <td style={{fontWeight: 600}}>{p.name}</td>
                 <td>{p.category}</td>
-                <td>₹{Number(p.purchaseCost).toFixed(2)}</td>
+                {isOwner && <td>₹{Number(p.purchaseCost).toFixed(2)}</td>}
                 <td>₹{Number(p.defaultSellingPrice).toFixed(2)}</td>
                 <td>
                   <span className={`badge ${p.currentStock > 5 ? 'badge-success' : p.currentStock > 0 ? 'badge-warning' : 'badge-danger'}`}>
@@ -159,10 +164,12 @@ export default function Inventory() {
                 <input className="form-input" type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
               </div>
               <div className="flex gap-4">
-                <div className="form-group w-full">
-                  <label className="form-label">Purchase Cost (₹)</label>
-                  <input required className="form-input" type="number" step="0.01" value={formData.purchaseCost} onChange={e => setFormData({...formData, purchaseCost: e.target.value})} />
-                </div>
+                {isOwner && (
+                  <div className="form-group w-full">
+                    <label className="form-label">Purchase Cost (₹)</label>
+                    <input required className="form-input" type="number" step="0.01" value={formData.purchaseCost} onChange={e => setFormData({...formData, purchaseCost: e.target.value})} />
+                  </div>
+                )}
                 <div className="form-group w-full">
                   <label className="form-label">Default Selling Price (₹)</label>
                   <input required className="form-input" type="number" step="0.01" value={formData.defaultSellingPrice} onChange={e => setFormData({...formData, defaultSellingPrice: e.target.value})} />
