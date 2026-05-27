@@ -63,7 +63,7 @@ export default function Reports() {
       if (dateTo) params.push(`to=${dateTo}`);
       params.push(`format=${format}`);
       
-      const response = await api.get(`/reports/export?${params.join('&')}`, {
+      const response = await api.get(`/api/reports/export?${params.join('&')}`, {
         responseType: 'blob'
       });
       

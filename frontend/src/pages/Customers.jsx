@@ -14,7 +14,7 @@ export default function Customers() {
   const [payForm, setPayForm] = useState({ amount: 0, notes: '' });
 
   const loadCustomers = () => {
-    api.get('/customers').then(res => setCustomers(res.data)).catch(console.error);
+    api.get('/api/customers').then(res => setCustomers(res.data)).catch(console.error);
   };
 
   useEffect(() => { loadCustomers(); }, []);
@@ -34,7 +34,7 @@ export default function Customers() {
 
   const handleCreateCustomer = (e) => {
     e.preventDefault();
-    api.post('/customers', form).then(() => {
+    api.post('/api/customers', form).then(() => {
       loadCustomers();
       setShowAddModal(false);
       setForm({ name: '', phone: '', address: '' });
@@ -43,7 +43,7 @@ export default function Customers() {
 
   const handlePayment = (e) => {
     e.preventDefault();
-    api.post(`/customers/${activeCustomer.id}/payment`, payForm).then(() => {
+    api.post(`/api/customers/${activeCustomer.id}/payment`, payForm).then(() => {
       loadCustomers();
       setShowPayModal(false);
       setActiveCustomer(null);

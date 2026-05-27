@@ -60,7 +60,7 @@ export default function Inventory() {
   const [editingId, setEditingId] = useState(null);
 
   const loadProducts = () => {
-    api.get('/products').then(res => setProducts(res.data)).catch(console.error);
+    api.get('/api/products').then(res => setProducts(res.data)).catch(console.error);
   };
 
   useEffect(() => { loadProducts(); }, []);
@@ -71,12 +71,12 @@ export default function Inventory() {
     if (!isOwner) delete submitData.purchaseCost;
     
     if (editingId) {
-      api.put(`/products/${editingId}`, submitData).then(() => {
+      api.put(`/api/products/${editingId}`, submitData).then(() => {
         loadProducts();
         closeModal();
       }).catch(console.error);
     } else {
-      api.post('/products', submitData).then(() => {
+      api.post('/api/products', submitData).then(() => {
         loadProducts();
         closeModal();
       }).catch(console.error);
@@ -85,7 +85,7 @@ export default function Inventory() {
 
   const handleDelete = (id) => {
     if(window.confirm('Are you sure you want to delete this product?')) {
-      api.delete(`/products/${id}`)
+      api.delete(`/api/products/${id}`)
         .then(() => loadProducts())
         .catch(err => alert(err.response?.data?.error || 'Failed to delete product.'));
     }

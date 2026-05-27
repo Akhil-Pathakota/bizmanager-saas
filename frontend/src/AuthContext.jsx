@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/api/auth/login', { email, password });
     const { token, user: userData } = res.data;
     localStorage.setItem('bizmanager-token', token);
     localStorage.setItem('bizmanager-user', JSON.stringify(userData));
@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
   };
 
   const register = async ({ email, password, name, businessName, inviteCode }) => {
-    const res = await api.post('/auth/register', {
+    const res = await api.post('/api/auth/register', {
       email, password, name, businessName, inviteCode
     });
     const { token, user: userData } = res.data;

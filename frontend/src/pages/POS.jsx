@@ -16,8 +16,8 @@ export default function POS() {
   const [showReceipt, setShowReceipt] = useState(null);
 
   useEffect(() => {
-    api.get('/products').then(res => setProducts(res.data)).catch(console.error);
-    api.get('/customers').then(res => setCustomers(res.data)).catch(console.error);
+    api.get('/api/products').then(res => setProducts(res.data)).catch(console.error);
+    api.get('/api/customers').then(res => setCustomers(res.data)).catch(console.error);
   }, []);
 
   // Get unique categories
@@ -104,7 +104,7 @@ export default function POS() {
       }))
     };
 
-    api.post('/orders', payload).then((res) => {
+    api.post('/api/orders', payload).then((res) => {
       const customer = selectedCustomerId ? customers.find(c => c.id === parseInt(selectedCustomerId)) : null;
       const actualBalance = Math.max(0, totalValue - actualPaid);
 
@@ -135,7 +135,7 @@ export default function POS() {
       setCart([]);
       setSelectedCustomerId('');
       setAmountPaidUpfront('');
-      api.get('/products').then(r => setProducts(r.data));
+      api.get('/api/products').then(r => setProducts(r.data));
     }).catch(err => alert(err.response?.data?.error || 'Failed to checkout'));
   };
 

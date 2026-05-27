@@ -14,14 +14,14 @@ export default function Vendors() {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const loadVendors = () => {
-    api.get('/vendors').then(res => setVendors(res.data)).catch(console.error);
+    api.get('/api/vendors').then(res => setVendors(res.data)).catch(console.error);
   };
 
   useEffect(() => { loadVendors(); }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    api.post('/vendors', formData).then(() => {
+    api.post('/api/vendors', formData).then(() => {
       loadVendors();
       setShowModal(false);
       setFormData({ name: '', contactPhone: '', contactEmail: '', leadTimeDays: 3 });
@@ -31,7 +31,7 @@ export default function Vendors() {
   const handleDelete = (id, e) => {
     e.stopPropagation(); 
     if(window.confirm('Are you sure you want to delete this supplier?')) {
-      api.delete(`/vendors/${id}`)
+      api.delete(`/api/vendors/${id}`)
         .then(() => {
           loadVendors();
           if (expandedVendorId === id) setExpandedVendorId(null);
@@ -51,7 +51,7 @@ export default function Vendors() {
     if (!historyData[vendorId]) {
       setLoadingHistory(true);
       try {
-        const res = await api.get(`/vendors/${vendorId}/purchases`);
+        const res = await api.get(`/api/vendors/${vendorId}/api/purchases`);
         setHistoryData(prev => ({ ...prev, [vendorId]: res.data }));
       } catch (err) {
         console.error("Failed to load history", err);

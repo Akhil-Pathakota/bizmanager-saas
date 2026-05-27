@@ -14,8 +14,8 @@ export default function Dashboard() {
   const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
-    api.get('/dashboard').then(res => setData(res.data)).catch(console.error);
-    api.get('/users').then(res => setTeam(res.data)).catch(console.error);
+    api.get('/api/dashboard').then(res => setData(res.data)).catch(console.error);
+    api.get('/api/users').then(res => setTeam(res.data)).catch(console.error);
   }, []);
 
   const handleFactoryReset = () => {

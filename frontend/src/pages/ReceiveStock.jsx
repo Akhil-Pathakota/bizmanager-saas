@@ -14,8 +14,8 @@ export default function ReceiveStock() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    api.get('/vendors').then(res => setVendors(res.data)).catch(console.error);
-    api.get('/products').then(res => setProducts(res.data)).catch(console.error);
+    api.get('/api/vendors').then(res => setVendors(res.data)).catch(console.error);
+    api.get('/api/products').then(res => setProducts(res.data)).catch(console.error);
   }, []);
 
   const filteredProducts = products.filter(p => 
@@ -62,7 +62,7 @@ export default function ReceiveStock() {
         totalCost: totalOrderCost,
         items: receiveItems
       };
-      await api.post('/purchases', payload);
+      await api.post('/api/purchases', payload);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -70,7 +70,7 @@ export default function ReceiveStock() {
         setInvoiceNumber('');
         setNotes('');
         setReceiveItems([]);
-        api.get('/products').then(res => setProducts(res.data));
+        api.get('/api/products').then(res => setProducts(res.data));
       }, 2000);
     } catch (err) {
       alert(err.response?.data?.error || "Error processing delivery");
