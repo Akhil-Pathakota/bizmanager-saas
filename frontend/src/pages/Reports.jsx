@@ -12,7 +12,7 @@ export default function Reports() {
 
   const loadReports = (from, to) => {
     setLoading(true);
-    let url = '/reports/daily';
+    let url = '/api/reports/daily';
     const params = [];
     if (from) params.push(`from=${from}`);
     if (to) params.push(`to=${to}`);
