@@ -51,7 +51,7 @@ export default function Vendors() {
     if (!historyData[vendorId]) {
       setLoadingHistory(true);
       try {
-        const res = await api.get(`/api/vendors/${vendorId}/api/purchases`);
+        const res = await api.get(`/api/vendors/${vendorId}/purchases`);
         setHistoryData(prev => ({ ...prev, [vendorId]: res.data }));
       } catch (err) {
         console.error("Failed to load history", err);
