@@ -36,7 +36,7 @@ export default function Dashboard() {
     e.preventDefault();
     setInviteLoading(true);
     try {
-      const res = await api.post('/auth/invite', { email: inviteEmail || null });
+      const res = await api.post('/api/auth/invite', { email: inviteEmail || null });
       setInviteCode(res.data.code);
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to create invite');

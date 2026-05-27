@@ -25,7 +25,7 @@ export default function Customers() {
     } else {
       setExpandedCustomerId(customerId);
       if (!customerOrders[customerId]) {
-        api.get(`/customers/${customerId}/orders`).then(res => {
+        api.get(`/api/customers/${customerId}/api/orders`).then(res => {
           setCustomerOrders(prev => ({ ...prev, [customerId]: res.data }));
         }).catch(console.error);
       }
