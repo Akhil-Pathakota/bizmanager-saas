@@ -80,11 +80,12 @@ export default function Customers() {
               <th>Contact Details</th>
               <th>Pending Balance</th>
               <th className="text-right">Actions</th>
+              <th>Phone</th>
             </tr>
           </thead>
           <tbody>
              {customers.length === 0 && (
-              <tr><td colSpan="5" className="text-center text-secondary">No customers added yet.</td></tr>
+              <tr><td colSpan="6" className="text-center text-secondary">No customers added yet.</td></tr>
             )}
             {customers.map(c => (
               <React.Fragment key={c.id}>
@@ -122,10 +123,24 @@ export default function Customers() {
                       )}
                     </div>
                   </td>
+                  
+                  <td>
+                     {c.phone ? (
+                      <a 
+                      href={`tel:${c.phone}`} 
+                      className="btn btn-outline"
+                      style={{padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px'}}
+                      onClick={(e) => e.stopPropagation()}>
+                        📞 Call
+                      </a>
+                      ) : (
+                      <span className="text-secondary text-sm">No Number</span>
+                      )}
+                  </td>
                 </tr>
                 {expandedCustomerId === c.id && (
                   <tr>
-                    <td colSpan="5" style={{backgroundColor: 'var(--bg-expanded-row)', padding: '20px 32px'}}>
+                    <td colSpan="6" style={{backgroundColor: 'var(--bg-expanded-row)', padding: '20px 32px'}}>
                       <div className="card" style={{margin: 0, boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-light)'}}>
                         <h3 className="flex items-center gap-2 mb-4" style={{fontSize: '15px'}}><History size={16}/> Order History</h3>
                         {!customerOrders[c.id] ? <p className="text-secondary text-sm">Loading orders...</p> : 
