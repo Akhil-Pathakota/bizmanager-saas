@@ -283,7 +283,8 @@ export default function POS() {
                     <input type="number" className="pos-qty-input"
                       step={isDecimal ? '0.01' : '1'} min={isDecimal ? '0.01' : '1'}
                       value={item.quantity}
-                      onChange={e => updateCartItem(item.productId, 'quantity', parseFloat(e.target.value) || 1)} />
+                      onChange={e => updateCartItem(item.productId, 'quantity', parseFloat(e.target.value) || 1)} 
+                      onFocus={e => e.target.select()}/>
                     <button className="pos-qty-btn" onClick={() => updateQuantity(item.productId, isDecimal ? 0.5 : 1)}>
                       <Plus size={14} />
                     </button>
