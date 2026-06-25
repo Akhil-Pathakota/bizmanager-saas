@@ -119,7 +119,7 @@ export default function POS() {
       });
 
       // Send WhatsApp if customer with phone
-      if (customer && customer.phone) {
+      /*if (customer && customer.phone) {
         let phone = (customer.phone || '').replace(/[\s\-\(\)\+]/g, '');
         if (phone.length === 10) phone = '91' + phone;
         let message = '';
@@ -130,7 +130,7 @@ export default function POS() {
           message = `Hi ${customer.name}, thank you for your purchase! Bill of ₹${totalValue.toFixed(2)} fully paid. Have a great day!`;
         }
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-      }
+      }*/
 
       setCart([]);
       setSelectedCustomerId('');
