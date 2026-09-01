@@ -5,3 +5,5 @@ sqlalchemy==2.0.41
 bcrypt==4.3.0
 openpyxl==3.1.5
 python-dotenv==1.1.0
+psycopg2-binary
+supabase==2.3.4

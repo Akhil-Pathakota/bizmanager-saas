@@ -1798,3 +1798,117 @@ a:hover {
 [data-theme="dark"] .pos-cart-remove:hover {
   background: rgba(239, 68, 68, 0.1);
 }
+
+/* =====================================================
+   PRODUCT IMAGE UPLOAD & THUMBNAILS
+   ===================================================== */
+
+/* Table thumbnail beside product name */
+.product-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.product-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product-name-text {
+  font-weight: 600;
+}
+[data-theme="dark"] .product-thumb {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border-color: #475569;
+}
+
+/* Image upload area in modal */
+.image-upload-area {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  overflow: hidden;
+  background: var(--bg-hover);
+}
+.image-upload-area:hover {
+  border-color: var(--brand-primary);
+  background: rgba(59, 130, 246, 0.04);
+}
+[data-theme="dark"] .image-upload-area {
+  background: rgba(30, 41, 59, 0.5);
+}
+[data-theme="dark"] .image-upload-area:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--brand-primary);
+}
+
+.image-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+.image-upload-placeholder span {
+  font-size: 14px;
+  font-weight: 500;
+}
+.image-upload-hint {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+.image-preview {
+  max-height: 160px;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  box-shadow: var(--shadow-sm);
+}
+.image-remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.image-remove-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}

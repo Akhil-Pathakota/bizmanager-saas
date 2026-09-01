@@ -52,6 +52,7 @@ class Product(Base):
     defaultSellingPrice = Column(Float, default=0.0)
     currentStock = Column(Float, default=0)
     unit = Column(String, default="pcs")
+    image_url = Column(String, nullable=True, default=None)
 
     business = relationship("Business", back_populates="products")
 

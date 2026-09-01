@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from database import engine, SessionLocal
@@ -14,6 +14,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
+from supabase import create_client, Client
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,6 +28,20 @@ CORS(app, supports_credentials=True)
 app.config["JWT_SECRET_KEY"] = "bizmanager-secret-key-change-in-production"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=7)
 jwt = JWTManager(app)
+
+# Supabase Storage configuration
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
+
+supabase_client: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # SMTP Configuration from environment variables
 SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
@@ -365,7 +381,8 @@ def get_products():
         for p in products:
             item = {"id": p.id, "name": p.name, "category": p.category,
                     "defaultSellingPrice": p.defaultSellingPrice,
-                    "currentStock": p.currentStock, "unit": p.unit or "pcs"}
+                    "currentStock": p.currentStock, "unit": p.unit or "pcs",
+                    "imageUrl": p.image_url}
             if user.role == 'owner':
                 item["purchaseCost"] = p.purchaseCost
             result.append(item)
@@ -392,7 +409,7 @@ def add_product():
         db.add(product)
         db.commit()
         db.refresh(product)
-        return jsonify({"id": product.id}), 201
+        return jsonify({"id": product.id, "imageUrl": product.image_url}), 201
     finally:
         db.close()
 
@@ -434,8 +451,102 @@ def delete_product(id):
         has_orders = db.query(models.OrderItem).filter(models.OrderItem.productId == id).first()
         if has_orders:
             return jsonify({"error": "Cannot delete product because it has past sales records."}), 400
+        # Clean up image file if exists
+        if product.image_url and supabase_client:
+            try:
+                # Extract filename from the URL
+                filename = product.image_url.split('/')[-1]
+                supabase_client.storage.from_("product-images").remove([filename])
+            except Exception as e:
+                print(f"Failed to delete image from Supabase: {e}")
         db.delete(product)
         db.commit()
+        return jsonify({"success": True}), 200
+    finally:
+        db.close()
+
+
+@app.route('/api/products/<int:id>/image', methods=['POST'])
+@jwt_required()
+def upload_product_image(id):
+    db = SessionLocal()
+    try:
+        user = get_current_user(db)
+        product = db.query(models.Product).filter(
+            models.Product.id == id, models.Product.business_id == user.business_id).first()
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+
+        if 'image' not in request.files:
+            return jsonify({"error": "No image file provided"}), 400
+
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({"error": "No file selected"}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({"error": "File type not allowed. Use PNG, JPG, or WebP."}), 400
+
+        # Check file size
+        file.seek(0, 2)
+        size = file.tell()
+        file.seek(0)
+        if size > MAX_IMAGE_SIZE:
+            return jsonify({"error": "File too large. Maximum size is 5 MB."}), 400
+
+        if not supabase_client:
+            return jsonify({"error": "Supabase Storage is not configured."}), 500
+
+        # Delete old image if exists
+        if product.image_url:
+            try:
+                old_filename = product.image_url.split('/')[-1]
+                supabase_client.storage.from_("product-images").remove([old_filename])
+            except Exception as e:
+                print(f"Failed to delete old image from Supabase: {e}")
+
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{product.id}_{int(datetime.datetime.utcnow().timestamp())}.{ext}"
+        
+        # Upload to Supabase
+        file_bytes = file.read()
+        res = supabase_client.storage.from_("product-images").upload(
+            path=filename,
+            file=file_bytes,
+            file_options={"content-type": file.content_type}
+        )
+
+        # Get public URL
+        public_url = supabase_client.storage.from_("product-images").get_public_url(filename)
+        
+        product.image_url = public_url
+        db.commit()
+
+        return jsonify({"imageUrl": product.image_url}), 200
+    finally:
+        db.close()
+
+
+@app.route('/api/products/<int:id>/image', methods=['DELETE'])
+@jwt_required()
+def delete_product_image(id):
+    db = SessionLocal()
+    try:
+        user = get_current_user(db)
+        product = db.query(models.Product).filter(
+            models.Product.id == id, models.Product.business_id == user.business_id).first()
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+
+        if product.image_url and supabase_client:
+            try:
+                image_filename = product.image_url.split('/')[-1]
+                supabase_client.storage.from_("product-images").remove([image_filename])
+            except Exception as e:
+                print(f"Failed to delete image from Supabase: {e}")
+            product.image_url = None
+            db.commit()
+
         return jsonify({"success": True}), 200
     finally:
         db.close()
