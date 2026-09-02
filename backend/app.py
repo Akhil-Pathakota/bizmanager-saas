@@ -481,6 +481,7 @@ def upload_product_image(id):
     # This prevents the browser preflight from being blocked by JWT
     if request.method == "OPTIONS":
         return jsonify({"success": True}), 200
+    db = SessionLocal()
     try:
         user = get_current_user(db)
         product = db.query(models.Product).filter(
