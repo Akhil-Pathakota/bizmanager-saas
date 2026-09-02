@@ -31,7 +31,7 @@ CORS(app, supports_credentials=True, resources={
             "http://localhost:5173"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"]
+        "allow_headers": "*"
     }
 })
 app.config["JWT_SECRET_KEY"] = "bizmanager-secret-key-change-in-production"
