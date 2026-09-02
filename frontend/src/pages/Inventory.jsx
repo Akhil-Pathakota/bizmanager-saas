@@ -113,7 +113,7 @@ export default function Inventory() {
   };
 
   const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('Are you sure you want to delete this product?')) {
       api.delete(`/api/products/${id}`)
         .then(() => loadProducts())
         .catch(err => alert(err.response?.data?.error || 'Failed to delete product.'));
@@ -126,7 +126,7 @@ export default function Inventory() {
       setEditingId(product.id);
       if (product.imageUrl) {
         setExistingImageUrl(product.imageUrl);
-        setImagePreview(`${API_BASE}${product.imageUrl}`);
+        setImagePreview(product.imageUrl);
       } else {
         setExistingImageUrl(null);
         setImagePreview(null);
@@ -188,7 +188,7 @@ export default function Inventory() {
     <div>
       <div className="page-header">
         <h1 className="page-title">Inventory Management</h1>
-        <button className="btn btn-primary" onClick={() => openModal()}><Plus size={16}/> Add Product</button>
+        <button className="btn btn-primary" onClick={() => openModal()}><Plus size={16} /> Add Product</button>
       </div>
 
       <div className="table-container">
@@ -231,9 +231,9 @@ export default function Inventory() {
                       {p.currentStock} {p.unit || 'pcs'}
                     </span>
                   </td>
-                  <td className="text-right flex items-center gap-2" style={{justifyContent: 'flex-end'}}>
-                    <button className="btn btn-outline" style={{padding: '6px 10px'}} onClick={() => openModal(p)}><Edit2 size={14}/></button>
-                    <button className="btn btn-danger" style={{padding: '6px 10px'}} onClick={() => handleDelete(p.id)}><Trash2 size={14}/></button>
+                  <td className="text-right flex items-center gap-2" style={{ justifyContent: 'flex-end' }}>
+                    <button className="btn btn-outline" style={{ padding: '6px 10px' }} onClick={() => openModal(p)}><Edit2 size={14} /></button>
+                    <button className="btn btn-danger" style={{ padding: '6px 10px' }} onClick={() => handleDelete(p.id)}><Trash2 size={14} /></button>
                   </td>
                 </tr>
               );
@@ -281,32 +281,32 @@ export default function Inventory() {
 
               <div className="form-group">
                 <label className="form-label">Product Name</label>
-                <input required className="form-input" type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                <input required className="form-input" type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
               </div>
               <div className="form-group">
                 <label className="form-label">Category</label>
-                <input className="form-input" type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
+                <input className="form-input" type="text" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} />
               </div>
               <div className="flex gap-4">
                 {isOwner && (
                   <div className="form-group w-full">
                     <label className="form-label">Purchase Cost (₹)</label>
-                    <input required className="form-input" type="number" step="0.01" value={formData.purchaseCost} onChange={e => setFormData({...formData, purchaseCost: e.target.value})} />
+                    <input required className="form-input" type="number" step="0.01" value={formData.purchaseCost} onChange={e => setFormData({ ...formData, purchaseCost: e.target.value })} />
                   </div>
                 )}
                 <div className="form-group w-full">
                   <label className="form-label">Default Selling Price (₹)</label>
-                  <input required className="form-input" type="number" step="0.01" value={formData.defaultSellingPrice} onChange={e => setFormData({...formData, defaultSellingPrice: e.target.value})} />
+                  <input required className="form-input" type="number" step="0.01" value={formData.defaultSellingPrice} onChange={e => setFormData({ ...formData, defaultSellingPrice: e.target.value })} />
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="form-group w-full">
                   <label className="form-label">Stock Quantity</label>
-                  <input required className="form-input" type="number" step={isDecimalUnit ? '0.01' : '1'} value={formData.currentStock} onChange={e => setFormData({...formData, currentStock: e.target.value})} />
+                  <input required className="form-input" type="number" step={isDecimalUnit ? '0.01' : '1'} value={formData.currentStock} onChange={e => setFormData({ ...formData, currentStock: e.target.value })} />
                 </div>
                 <div className="form-group w-full">
                   <label className="form-label">Unit of Measurement</label>
-                  <select className="form-input" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})}>
+                  <select className="form-input" value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })}>
                     {UNIT_OPTIONS.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
                   </select>
                 </div>

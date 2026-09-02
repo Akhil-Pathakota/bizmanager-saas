@@ -24,7 +24,16 @@ load_dotenv()
 models.Base.metadata.create_all(bind=engine)
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, resources={
+    r"/api/*": {
+        "origins": [
+            "https://bizmanager-saas.vercel.app", 
+            "http://localhost:5173"
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"]
+    }
+})
 app.config["JWT_SECRET_KEY"] = "bizmanager-secret-key-change-in-production"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=7)
 jwt = JWTManager(app)
@@ -466,10 +475,12 @@ def delete_product(id):
         db.close()
 
 
-@app.route('/api/products/<int:id>/image', methods=['POST'])
+@app.route('/api/products/<int:id>/image', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def upload_product_image(id):
-    db = SessionLocal()
+    # This prevents the browser preflight from being blocked by JWT
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
     try:
         user = get_current_user(db)
         product = db.query(models.Product).filter(
@@ -527,9 +538,12 @@ def upload_product_image(id):
         db.close()
 
 
-@app.route('/api/products/<int:id>/image', methods=['DELETE'])
+@app.route('/api/products/<int:id>/image', methods=['DELETE', 'OPTIONS'])
 @jwt_required()
 def delete_product_image(id):
+    # This prevents the browser preflight from being blocked by JWT
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
     db = SessionLocal()
     try:
         user = get_current_user(db)
